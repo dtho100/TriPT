@@ -2,3 +2,4 @@
 config/secrets.py
 secrets.json
 .venv/
+data/raw/post_workout/post_session_data.csv
