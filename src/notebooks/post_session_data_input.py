@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import argparse
 import datetime
 
@@ -35,34 +36,26 @@ csv_schema_mapping = {
     "pain_notes": "Pain Notes",
 }
 
+column_dtypes = {
+    "Body Weight": "string",
+    "Sleep (h)": "string",
+    "Resting HR": "string",
+    "HRV (night)": "string",
+    "Pain Notes": "string",
+    "Session 1 Personal Notes": "string",
+    "Session 2 Personal Notes": "string",
+    "General Notes": "string"
+}
+
 def read_csv(path=None, file_name='post_session_data.csv'):
     if path is None:
         df = pd.read_csv(f"/Users/daleythomsen/Documents/GitHub/TriPT/data/raw/post_workout/{file_name}",         
-            dtype={
-                "Body Weight": "float64",
-                "Sleep (h)": "float64",
-                "Resting HR": "float64",
-                "HRV (night)": "float64",
-                "Pain Notes": "string",
-                "Session 1 Personal Notes": "string",
-                "Session 2 Personal Notes": "string",
-                "General Notes": "string",
-                },
-    parse_dates=["Date"])
+            dtype=str)
     else:
         df = pd.read_csv(path,         
-            dtype={
-                "Body Weight": "float64",
-                "Sleep (h)": "float64",
-                "Resting HR": "float64",
-                "HRV (night)": "float64",
-                "Pain Notes": "string",
-                "Session 1 Personal Notes": "string",
-                "Session 2 Personal Notes": "string",
-                "General Notes": "string",
-                },
-    parse_dates=["Date"])
-    df = df.dropna(how="all").reset_index(drop=True)
+            dtype=str)
+    df["Date"] = pd.to_datetime(df["Date"], format="mixed").dt.date
+    #df = df.dropna(how="all").reset_index(drop=True)
     # df["Date"] = pd.to_datetime(df["Date"])
     # df["Body Weight"] = pd.to_float(df["Body Weight"])
     # df["Pain Notes"] = pd.to_string(df["Date"])
@@ -80,19 +73,19 @@ def gather_input(questions=user_input):
             user_answer = input(question["prompt"]).strip()
             if question["name"] == "date":
                 if user_answer == '':
-                    user_answer = datetime.datetime.now().strftime("%Y-%m-%d")
+                    user_answer = datetime.date.today()
                     question["user_answer"] = user_answer
                     break
                 else:
                     try:
                         datetime.datetime.strptime(user_answer, '%Y-%m-%d')
-                        question["user_answer"] = user_answer
+                        question["user_answer"] = datetime.datetime.strptime(user_answer, "%Y-%m-%d").date()
                         break
                     except ValueError:
                         print("Incorrect format. Must be YYYY-MM-DD.")
             elif question["type"] == "float":
                     if user_answer == '':
-                        question["user_answer"] = None
+                        question["user_answer"] = ''
                         break
                     else:
                         try:
@@ -107,39 +100,45 @@ def gather_input(questions=user_input):
 
     return {question["name"]: question["user_answer"] for question in questions}
 
+#{column: dtype for column, dtype in column_dtypes.items() if column in ["Body Weight", "General Notes"]}
+
 def write_data(user_answers, df, csv_schema_mapping=csv_schema_mapping, path=None, file_name='post_session_data.csv'):
     mapped_user_answers = pd.DataFrame([dict((csv_schema_mapping[key], value) for (key, value) in user_answers.items())])
-    mapped_user_answers.set_index("Date")
+    mapped_user_answers = mapped_user_answers.astype(str)#{column: dtype for column, dtype in column_dtypes.items() if column in list(mapped_user_answers.columns)})
+    mapped_user_answers["Date"] = pd.to_datetime(mapped_user_answers["Date"], format="mixed").dt.date
+    mapped_user_answers.set_index("Date", inplace=True)
+    df.set_index("Date", inplace = True)
     if df.empty:
         df = mapped_user_answers
     else:
-        if df["Date"].eq(mapped_user_answers["Date"].iloc[0]).any():
+        #print(mapped_user_answers, df)
+        #print(df["Date"].eq(mapped_user_answers["Date"].iloc[0]).any())
+        #return
+        if list(df.index.intersection(mapped_user_answers.index)) != []:
             while True:
-                user_input = input(f"Data for {mapped_user_answers['Date'].iloc[0]} found. Do you want to overwrite? (yes, no): ")
+                user_input = input(f"Data for {mapped_user_answers.index[0]} found. Do you want to overwrite? (yes, no): ")
                 if (user_input.lower() == 'yes') | (user_input.lower() == 'y'):
-                    df.set_index("Date")
                     df.update(mapped_user_answers)
-                    # df = pd.concat([df[~df.index.isin(mapped_user_answers.index)], mapped_user_answers])
-                    # df.update(mapped_user_answers)
-#                    df = df[~df["Date"].eq(mapped_user_answers["Date"].iloc[0])]
- #                   df = pd.concat([df, mapped_user_answers], ignore_index=True)
                     break
                 elif (user_input.lower() == 'no') | (user_input.lower() == 'n'):
                     break
                 else:
                     print('Type yes or no')
         else:
-            df = pd.concat([df, mapped_user_answers], ignore_index=True)
-#    print(df)
+            df = pd.concat([df, mapped_user_answers], ignore_index=False)
+    float_columns = ["Body Weight", "Sleep (h)", "Resting HR", "HRV (night)"]
+    df[float_columns] = df[float_columns].replace({'': None})
+    df["Body Weight"] = df["Body Weight"].astype(float)
+    df["Sleep (h)"] = df["Sleep (h)"].astype(float)
+    df["Resting HR"] = df["Resting HR"].astype(float)
+    df["HRV (night)"] = df["HRV (night)"].astype(float)
+    df = df.sort_index(ascending=True)
     if path is None:
-        df.to_csv(f"/Users/daleythomsen/Documents/GitHub/TriPT/data/raw/post_workout/{file_name}", index=False)
+        df.to_csv(f"/Users/daleythomsen/Documents/GitHub/TriPT/data/raw/post_workout/{file_name}")
         print(f"File written to /Users/daleythomsen/Documents/GitHub/TriPT/data/raw/post_workout/{file_name}")
     else:
         df.to_csv(path)
         print(f"File written to {path}")
-
-    
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Update post-session training log.")
