@@ -1,18 +1,22 @@
-import numpy as np
 import pandas as pd
 import argparse
 import datetime
 
 questions = [
+    {"time_of_day": "morning","questions": {
         {"name": "date", "prompt": "What date are you entering data for (YYYY-MM-DD)? ", "type": "date"},
         {"name": "body_weight", "prompt": "Enter morning BW: ", "type": "float"},
-        {"name": "pain_notes", "prompt": "Enter any pains (out of 10) and where they occur: ", "type": "str"},
         {"name": "sleep", "prompt": "Enter number of hours slept: ", "type": "float"},
         {"name": "rhr", "prompt": "Enter RHR from last night: ", "type": "float"},
-        {"name": "hrv", "prompt": "Enter HRV from last night: ", "type": "float"},
+        {"name": "hrv", "prompt": "Enter HRV from last night: ", "type": "float"}}
+        },
+    {"time_of_day": "evening","questions": {
+
+        {"name": "pain_notes", "prompt": "Enter any pains (out of 10) and where they occur: ", "type": "str"},
         {"name": "session_1_notes", "prompt": "Enter any Session 1 notes: ", "type": "str"},
         {"name": "session_2_notes", "prompt": "Enter any Session 2 notes: ", "type": "str"},
-        {"name": "general_notes", "prompt": "Enter any other notes: ", "type": "str"},
+        {"name": "general_notes", "prompt": "Enter any other notes: ", "type": "str"}}
+    }
     ]
 
 csv_schema_mapping = {
@@ -28,7 +32,7 @@ csv_schema_mapping = {
 }
 
 def read_csv(path=None, file_name='post_session_data.csv'):
-    if path == None:
+    if path is None:
         df = pd.read_csv(f"/Users/daleythomsen/Documents/GitHub/TriPT/data/raw/post_workout/{file_name}")
     else:
         df = pd.read_csv(path)
@@ -46,7 +50,7 @@ def gather_input(questions=questions):
                     break
                 else:
                     try:
-                        date = datetime.datetime.strptime(user_answer, '%Y-%m-%d')
+                        datetime.datetime.strptime(user_answer, '%Y-%m-%d')
                         question["user_answer"] = user_answer
                         break
                     except ValueError:
@@ -86,7 +90,7 @@ def write_data(user_answers, df, csv_schema_mapping=csv_schema_mapping, path=Non
                     print('Type yes or no')
         else:
             df = pd.concat([df, mapped_user_answers], ignore_index=True)
-    if path == None:
+    if path is None:
         df.to_csv(f"/Users/daleythomsen/Documents/GitHub/TriPT/data/raw/post_workout/{file_name}", index=False)
         print(f"File written to /Users/daleythomsen/Documents/GitHub/TriPT/data/raw/post_workout/{file_name}")
     else:

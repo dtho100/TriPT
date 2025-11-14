@@ -1,11 +1,21 @@
-altgraph @ file:///AppleInternal/Library/BuildRoots/39d9dc1a-2111-11f0-be06-226177e5bb69/Library/Caches/com.apple.xbs/Sources/python3/altgraph-0.17.2-py2.py3-none-any.whl
+altgraph==0.17.2
+black==25.11.0
+click==8.1.8
 et_xmlfile==2.0.0
-future @ file:///AppleInternal/Library/BuildRoots/39d9dc1a-2111-11f0-be06-226177e5bb69/Library/Caches/com.apple.xbs/Sources/python3/future-0.18.2-py3-none-any.whl
-macholib @ file:///AppleInternal/Library/BuildRoots/39d9dc1a-2111-11f0-be06-226177e5bb69/Library/Caches/com.apple.xbs/Sources/python3/macholib-1.15.2-py2.py3-none-any.whl
+future==0.18.2
+macholib==1.15.2
+mypy_extensions==1.1.0
 numpy==2.0.2
 openpyxl==3.1.5
+packaging==25.0
 pandas==2.3.3
+pathspec==0.12.1
+platformdirs==4.4.0
 python-dateutil==2.9.0.post0
+pytokens==0.3.0
 pytz==2025.2
-six @ file:///AppleInternal/Library/BuildRoots/39d9dc1a-2111-11f0-be06-226177e5bb69/Library/Caches/com.apple.xbs/Sources/python3/six-1.15.0-py2.py3-none-any.whl
+ruff==0.14.5
+six==1.15.0
+tomli==2.3.0
+typing_extensions==4.15.0
 tzdata==2025.2

@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from pathlib import Path
 import argparse
@@ -7,7 +6,7 @@ import datetime
 def process_excel_files(input_files, parent_path=None):
     processed_data = pd.DataFrame()
     for file in input_files:
-        if parent_path == None:
+        if parent_path is None:
             df = pd.read_excel(Path.cwd() / file)
         else:
             df = pd.read_excel(parent_path + '/' + file)
@@ -52,7 +51,7 @@ def process_excel_files(input_files, parent_path=None):
 
 def write_to_csv(processed_data, parent_path=None, output_file_name = 'combined'):
     current_time = str(datetime.datetime.now().strftime("%Y%m%d"))
-    if parent_path == None:
+    if parent_path is None:
         output_path = f"{Path.cwd()}/{str(output_file_name)}_{current_time}.csv"
     else:
         output_path = f"{parent_path}/{str(output_file_name)}_{current_time}.csv"
