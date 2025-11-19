@@ -36,17 +36,6 @@ csv_schema_mapping = {
     "pain_notes": "Pain Notes",
 }
 
-column_dtypes = {
-    "Body Weight": "string",
-    "Sleep (h)": "string",
-    "Resting HR": "string",
-    "HRV (night)": "string",
-    "Pain Notes": "string",
-    "Session 1 Personal Notes": "string",
-    "Session 2 Personal Notes": "string",
-    "General Notes": "string"
-}
-
 def read_csv(path=None, file_name='post_session_data.csv'):
     if path is None:
         df = pd.read_csv(f"/Users/daleythomsen/Documents/GitHub/TriPT/data/raw/post_workout/{file_name}",         
@@ -100,8 +89,6 @@ def gather_input(questions=user_input):
 
     return {question["name"]: question["user_answer"] for question in questions}
 
-#{column: dtype for column, dtype in column_dtypes.items() if column in ["Body Weight", "General Notes"]}
-
 def write_data(user_answers, df, csv_schema_mapping=csv_schema_mapping, path=None, file_name='post_session_data.csv'):
     mapped_user_answers = pd.DataFrame([dict((csv_schema_mapping[key], value) for (key, value) in user_answers.items())])
     mapped_user_answers = mapped_user_answers.astype(str)#{column: dtype for column, dtype in column_dtypes.items() if column in list(mapped_user_answers.columns)})
@@ -111,9 +98,6 @@ def write_data(user_answers, df, csv_schema_mapping=csv_schema_mapping, path=Non
     if df.empty:
         df = mapped_user_answers
     else:
-        #print(mapped_user_answers, df)
-        #print(df["Date"].eq(mapped_user_answers["Date"].iloc[0]).any())
-        #return
         if list(df.index.intersection(mapped_user_answers.index)) != []:
             while True:
                 user_input = input(f"Data for {mapped_user_answers.index[0]} found. Do you want to overwrite? (yes, no): ")
